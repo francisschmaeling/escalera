@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Escalera app demo</title>
+<meta name="description" content="Escalera student and teacher screens with sample data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gelasio:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #0447C6; --brand-hover: #0A3AA3; --brand-50: #EFF4FF; --brand-100: #DCE6FD; --brand-200: #BFD3FD;
+    --navy: #0B2A75; --ink: #1F2937; --body: #374151; --muted: #6B7280; --faint: #9CA3AF;
+    --line: #E5E7EB; --line-2: #D1D5DB; --bg: #F5F7FB; --panel: #F9FAFB;
+    --coral: #F46158; --coral-dark: #B42318; --coral-50: #FFF1EE; --coral-100: #FFE2DC; --coral-300: #FBA59B;
+    --skill: #1E3A8A;
+    --shadow: 0 1px 2px rgb(16 24 40 / .05);
+    --serif: Gelasio, Georgia, "Times New Roman", serif;
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--bg);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #F5F7FB; } }
+  :root[data-theme="dark"] { --bg: #F5F7FB; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  h1, h2, h3, p, dl, dd, ol, ul { margin: 0; }
+  ol, ul { padding: 0; list-style: none; }
+  a { color: var(--brand); font-weight: 600; text-decoration: none; }
+  a:hover { color: var(--brand-hover); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  svg { display: block; flex: none; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .muted { color: var(--muted); }
+  .serif { font-family: var(--serif); font-weight: 700; color: var(--navy); letter-spacing: -0.01em; }
+
+  /* demo switch (floating, out of the way) */
+  .demobar { position: fixed; z-index: 40; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 10px 25px -5px rgb(16 24 40 / .15), 0 0 0 1px rgb(16 24 40 / .08); font-size: 13px; }
+  .demobar span { padding: 0 8px 0 10px; color: var(--muted); font-weight: 500; }
+  .demobar a { padding: 6px 12px; border-radius: 999px; color: var(--body); font-weight: 600; }
+  .demobar a.on { background: var(--brand); color: #FFFFFF; }
+
+  /* logo */
+  .logo { display: inline-flex; align-items: center; gap: 10px; color: var(--navy); }
+  .logo svg { width: 28px; height: auto; color: var(--brand); }
+  .logo span { font-family: var(--serif); font-weight: 700; font-size: 24px; letter-spacing: -0.01em; }
+  .logo:hover { color: var(--navy); }
+
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 18px; border: 0; border-radius: 8px; font-size: 15px; font-weight: 600; line-height: 20px; text-decoration: none; cursor: pointer; box-shadow: var(--shadow); white-space: nowrap; transition: background-color .15s ease; }
+  .btn svg { width: 20px; height: 20px; }
+  .btn-primary { background: var(--brand); color: #FFFFFF; }
+  .btn-primary:hover { background: var(--brand-hover); color: #FFFFFF; }
+  .btn-secondary { background: #FFFFFF; color: var(--brand-hover); box-shadow: var(--shadow), inset 0 0 0 1px var(--line-2); }
+  .btn-secondary:hover { background: var(--panel); color: var(--brand-hover); }
+  .btn-two { flex-direction: column; gap: 0; min-height: 56px; padding: 8px 24px; }
+  .btn-two small { font-size: 13px; line-height: 18px; font-weight: 400; opacity: .85; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+  /* cards */
+  .card { background: #FFFFFF; border-radius: 12px; box-shadow: var(--shadow), 0 0 0 1px rgb(16 24 40 / .07); }
+  .pad { padding: clamp(20px, 2.8vw, 36px); }
+  .card-title { font-family: var(--serif); font-weight: 700; font-size: clamp(21px, 1.7vw, 24px); line-height: 1.2; color: var(--navy); }
+  .card-sub { margin-top: 6px; font-size: 15px; color: var(--muted); }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .wrap-row { flex-wrap: wrap; }
+  .mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; } .mt-8 { margin-top: 32px; }
+  .divider { height: 1px; background: var(--line); border: 0; margin: 24px 0; }
+
+  /* avatar, chips */
+  .av { width: 40px; height: 40px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--brand-50); color: var(--brand-hover); font-size: 14px; font-weight: 700; }
+  .count { min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: var(--brand); color: #FFFFFF; font-size: 13px; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 14px; border-radius: 8px; background: var(--coral-50); color: var(--ink); font-size: 16px; font-weight: 700; }
+  .chip small { font-size: 14px; font-weight: 400; color: var(--muted); }
+
+  /* forms */
+  .label { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .label small { margin-left: 8px; font-weight: 400; color: var(--muted); font-size: 14px; }
+  .input { display: block; width: 100%; margin-top: 8px; padding: 10px 14px; border: 0; border-radius: 8px; background: #FFFFFF; color: var(--ink); font-size: 16px; line-height: 24px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line-2); }
+  .input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
+  textarea.input { resize: vertical; min-height: 52px; }
+  .field + .field { margin-top: 20px; }
+  .seg { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .seg button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #FFFFFF; color: var(--brand-hover); font-weight: 600; cursor: pointer; box-shadow: var(--shadow), inset 0 0 0 1px var(--line-2); }
+  .seg button svg { width: 18px; height: 18px; }
+  .seg button[aria-pressed="true"] { background: var(--brand); color: #FFFFFF; box-shadow: var(--shadow); }
+
+  /* ================= STUDENT ================= */
+  .sbar { position: sticky; top: 0; z-index: 20; background: #FFFFFF; border-bottom: 1px solid var(--line); }
+  .sbar .in { display: flex; align-items: center; gap: 16px 24px; min-height: 72px; max-width: 1280px; margin: 0 auto; padding: 12px clamp(16px, 3vw, 32px); }
+  .sbar .ctx { padding-left: 24px; border-left: 1px solid var(--line); line-height: 1.35; }
+  .sbar .ctx b { display: block; font-size: 17px; font-weight: 700; color: var(--ink); }
+  .sbar .ctx small { font-size: 14px; color: var(--muted); }
+  .sbar .prog { margin-left: auto; width: min(340px, 30vw); }
+  .sbar .prog small { font-size: 14px; color: var(--muted); }
+  .bar { height: 8px; margin-top: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 999px; background: var(--brand); }
+  .sbar .who { display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--ink); }
+  .sbar .prog + .who { margin-left: 8px; }
+  .sbar .who:first-of-type { margin-left: auto; }
+  .smain { max-width: 1280px; margin: 0 auto; padding: clamp(16px, 3vw, 32px) clamp(16px, 3vw, 32px) 96px; }
+  .two { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(16px, 2.4vw, 32px); align-items: start; }
+
+  /* join + today */
+  .center { min-height: calc(100vh - 74px); min-height: calc(100svh - 74px); display: flex; align-items: center; justify-content: center; padding: 32px 0; }
+  .center .card { width: min(100%, 440px); }
+  .hello { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 3vw, 38px); line-height: 1.15; color: var(--navy); }
+  .hello-sub { margin-top: 6px; font-size: 17px; color: var(--muted); }
+  .today-title { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 3vw, 40px); line-height: 1.1; color: var(--navy); }
+  .kicker { font-size: 14px; font-weight: 600; color: var(--brand); }
+  .meta { margin-top: 12px; font-size: 15px; color: var(--muted); }
+  .week li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+  .week li:first-child { border-top: 0; }
+  .week .dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 2px var(--line-2); color: #FFFFFF; }
+  .week .dot.done { background: var(--brand); box-shadow: none; }
+  .week .dot.now { box-shadow: inset 0 0 0 2px var(--coral); }
+  .week b { display: block; font-weight: 600; font-size: 15px; }
+  .week small { font-size: 13px; color: var(--muted); }
+  .week .score { font-size: 14px; color: var(--muted); }
+
+  /* practice */
+  .ptitle { font-family: var(--serif); font-weight: 700; font-size: clamp(32px, 3.2vw, 42px); line-height: 1.1; color: var(--navy); }
+  .paras { margin-top: 24px; display: flex; flex-direction: column; gap: 6px; }
+  .paras li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; padding: 12px 16px; border-radius: 10px; font-size: clamp(17px, 1.4vw, 19px); line-height: 1.75; color: var(--ink); }
+  .paras li span { padding-top: 4px; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .paras li.hl { background: var(--brand-50); }
+  .paras li.hl span { color: var(--brand); }
+  .ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .ladder i { display: block; height: 6px; border-radius: 999px; background: var(--line); }
+  .ladder b { display: block; margin-top: 12px; font-size: 15px; font-weight: 700; color: var(--ink); }
+  .ladder small { display: block; margin-top: 6px; font-size: 14px; color: var(--muted); }
+  .ladder .missed i { background: var(--faint); }
+  .ladder .now i { background: var(--coral); }
+  .ladder .now small { color: var(--coral-dark); font-weight: 700; }
+  .ladder .won i { background: var(--brand); }
+  .ladder .won small { color: var(--brand); font-weight: 700; }
+  .banner { margin-top: 28px; padding: 18px 20px; border-radius: 10px; background: var(--coral-50); }
+  .banner b { display: block; font-size: 17px; font-weight: 700; color: var(--ink); }
+  .banner span { display: block; margin-top: 4px; font-size: 15px; color: #6B4B45; }
+  .qtext { margin-top: 28px; font-size: clamp(21px, 2vw, 26px); line-height: 1.45; font-weight: 700; color: var(--ink); }
+  .qes { margin-top: 6px; font-size: 16px; color: var(--muted); }
+  .gl { padding: 0 6px; border-radius: 6px; background: var(--coral-100); text-decoration: underline dotted var(--coral); text-decoration-thickness: 2px; text-underline-offset: 5px; }
+  .glossary { margin-top: 24px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 28px; padding: 20px 24px; border-radius: 10px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); font-size: 16px; }
+  .glossary dt { font-weight: 700; color: var(--ink); }
+  .glossary dd { color: var(--body); }
+  .example { margin-top: 24px; padding: 18px 20px; border-radius: 10px; background: var(--brand-50); font-size: 15px; color: var(--ink); }
+  .example b { color: var(--navy); }
+  .example ol { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; list-style: decimal; padding-left: 20px; }
+  .example small { display: block; color: var(--muted); }
+  .choices { margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .choice { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: 10px; background: #FFFFFF; box-shadow: inset 0 0 0 1px var(--line-2); font-size: 18px; color: var(--ink); cursor: pointer; transition: box-shadow .15s ease, background .15s ease; }
+  .choice input { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; margin: 0; flex: none; border-radius: 50%; background: #FFFFFF; box-shadow: inset 0 0 0 2px var(--faint); cursor: pointer; }
+  .choice input:checked { box-shadow: inset 0 0 0 7px var(--brand); }
+  .choice small { display: block; font-size: 15px; color: var(--muted); }
+  .choice:hover { box-shadow: inset 0 0 0 1px var(--brand-200); }
+  .choice.sel, .choice.right { background: var(--brand-50); box-shadow: inset 0 0 0 2px var(--brand); }
+  .choice.wrong { background: var(--coral-50); box-shadow: inset 0 0 0 2px var(--coral); }
+  .choice.wrong input:checked { box-shadow: inset 0 0 0 7px var(--coral); }
+  .qactions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .result { margin-top: 24px; padding: 20px; border-radius: 10px; }
+  .result.ok { background: var(--brand); color: #FFFFFF; }
+  .result.ok .btn { background: #FFFFFF; color: var(--brand-hover); }
+  .result.no { background: var(--coral-50); color: var(--ink); }
+  .result b { display: block; font-size: 17px; }
+  .result p { margin-top: 4px; font-size: 15px; }
+  .result .btn { margin-top: 16px; }
+
+  /* respond */
+  .ace { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; margin-top: 22px; }
+  .ace .ltr { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--brand-50); color: var(--brand); font-family: var(--serif); font-weight: 700; font-size: 20px; }
+  .rec { margin-top: 24px; padding: 32px 16px; border-radius: 10px; box-shadow: inset 0 0 0 2px var(--line); text-align: center; }
+  .rec .mic { width: 64px; height: 64px; margin: 0 auto; border: 0; border-radius: 50%; background: var(--brand); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .rec .mic svg { width: 26px; height: 26px; }
+  .rec .mic.on { background: var(--coral); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 12px rgb(244 97 88 / .18); } }
+  .fb li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 14px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .mark { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 2px var(--brand); color: #FFFFFF; }
+  .mark.met { background: var(--brand); box-shadow: none; }
+  .mark svg { width: 15px; height: 15px; }
+  .fb b { font-weight: 700; }
+  .fb b span { font-weight: 400; }
+  .fb p { margin-top: 4px; color: var(--ink); }
+  .fb p.es { color: var(--muted); }
+  .gram { margin-top: 8px; padding: 20px; border-radius: 10px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .gram b { font-weight: 700; }
+  .gram p { margin-top: 10px; }
+  .gram p.es { color: var(--muted); }
+  .fixes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .fixes span { padding: 8px 12px; border-radius: 8px; background: #FFFFFF; box-shadow: inset 0 0 0 1px var(--line-2); }
+  .fixes s { color: var(--faint); }
+
+  /* results */
+  .big { font-family: var(--serif); font-weight: 700; font-size: clamp(56px, 6vw, 80px); line-height: 1; color: var(--navy); }
+  .qblocks { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+  .qblocks div { text-align: center; font-size: 12px; color: var(--muted); }
+  .qblocks i, .blocks i { display: block; border-radius: 5px; background: var(--brand); }
+  .qblocks i { height: 40px; margin-bottom: 6px; }
+  .qblocks i.words, .blocks i.words, .legend i.words { background: #FFC9C2; box-shadow: inset 0 0 0 1px var(--coral-300); }
+  .qblocks i.spanish, .blocks i.spanish, .legend i.spanish { background: var(--coral); }
+  .qblocks i.example, .blocks i.example, .legend i.example { background: #FFFFFF; box-shadow: inset 0 0 0 1px var(--line-2); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { display: block; width: 12px; height: 12px; border-radius: 3px; background: var(--brand); }
+  .blocks { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; }
+  .blocks i { height: 22px; border-radius: 4px; }
+
+  /* ================= TEACHER ================= */
+  .tapp { display: block; }
+  .side { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border-bottom: 1px solid var(--line); }
+  .side .logo { margin-right: auto; }
+  .classbtn { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 0; border-radius: 10px; background: #FFFFFF; box-shadow: var(--shadow), inset 0 0 0 1px var(--line-2); text-align: left; cursor: pointer; }
+  .classbtn b { display: block; font-size: 15px; font-weight: 700; line-height: 1.3; color: var(--ink); }
+  .classbtn small { display: block; font-size: 14px; color: var(--muted); }
+  .classbtn svg { width: 18px; height: 18px; color: var(--muted); }
+  .tnav { order: 3; width: 100%; display: flex; gap: 4px; overflow-x: auto; }
+  .navlink { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 10px; color: var(--ink); font-weight: 500; white-space: nowrap; }
+  .navlink svg { width: 22px; height: 22px; color: var(--muted); }
+  .navlink:hover { background: var(--panel); color: var(--ink); }
+  .navlink.on { background: var(--brand-50); color: var(--brand-hover); font-weight: 700; }
+  .navlink.on svg { color: var(--brand); }
+  .navlink .count { margin-left: auto; }
+  .side .me { display: none; }
+  .tmain { max-width: 1240px; padding: clamp(20px, 3vw, 40px) clamp(16px, 3vw, 40px) 96px; }
+  .tmain-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(34px, 3.4vw, 46px); line-height: 1.1; color: var(--navy); letter-spacing: -0.01em; }
+  .h1-sub { margin-top: 8px; font-size: 17px; color: var(--muted); }
+  .summary { margin-top: 24px; font-size: clamp(18px, 1.7vw, 22px); color: var(--ink); }
+  .summary a { text-decoration: underline; text-underline-offset: 4px; }
+  .grid-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 28px; align-items: start; }
+  .stack > * + * { margin-top: 24px; }
+  .gap-legend { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 14px; font-size: 15px; color: var(--muted); }
+  .gap-legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .gap-legend b { color: var(--ink); font-weight: 700; }
+  .gap-legend i { width: 16px; height: 16px; border-radius: 4px; background: var(--coral); }
+  .gap-legend i.k { background: var(--skill); }
+  .gaprow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .gaprow .nm { font-weight: 700; color: var(--ink); }
+  .gaprow .nm small { display: block; font-weight: 400; font-size: 14px; color: var(--muted); }
+  .split { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: #EEF1F5; }
+  .split span { display: block; }
+  .split .l { background: var(--coral); }
+  .split .k { background: var(--skill); }
+  .gaprow .cap { margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .recom { font-size: 15px; color: var(--ink); }
+  .recom .lang { color: var(--coral-dark); font-weight: 700; }
+  .recom .sk { color: var(--skill); font-weight: 700; }
+  .tbl-wrap { overflow-x: auto; margin-top: 12px; }
+  .tbl { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 15px; }
+  .tbl th { padding: 12px 16px 12px 0; text-align: left; font-size: 14px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .tbl th button { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+  .tbl td { padding: 14px 16px 14px 0; border-bottom: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+  .tbl td.name a { color: var(--ink); font-weight: 700; }
+  .tbl tr.link { cursor: pointer; }
+  .tbl tr.link:hover td { background: var(--panel); }
+  .own { display: inline-flex; align-items: center; gap: 12px; }
+  .own em { width: 38px; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; }
+  .meter { width: 100px; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .meter i { display: block; height: 100%; border-radius: 999px; background: var(--brand); }
+  .gapdot { display: inline-flex; align-items: center; gap: 10px; }
+  .gapdot i { width: 10px; height: 10px; border-radius: 50%; background: var(--coral); }
+  .gapdot i.k { background: var(--skill); }
+  .gapdot i.n { background: #FFFFFF; box-shadow: inset 0 0 0 2px var(--faint); }
+  .resp { padding: 20px 0; border-top: 1px solid var(--line); }
+  .resp:first-child { border-top: 0; padding-top: 8px; }
+  .person { display: flex; align-items: center; gap: 12px; }
+  .person b { display: block; font-weight: 700; color: var(--ink); }
+  .person small { font-size: 14px; color: var(--muted); }
+  .person .btn { margin-left: auto; min-height: 40px; padding: 6px 16px; }
+  .excerpt { margin-top: 12px; font-size: 15px; color: var(--body); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .player { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .player button { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 0; background: #FFFFFF; color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--line-2); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .player .track { flex: 1; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .player .track i { display: block; height: 100%; width: 0; background: var(--brand); }
+  .quote { margin-top: 16px; padding: 16px 18px; border-radius: 10px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); font-size: 16px; color: var(--ink); }
+  .rub { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .rub label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line-2); font-size: 15px; font-weight: 500; cursor: pointer; }
+  .rub input { width: 18px; height: 18px; margin: 0; accent-color: var(--brand); }
+  .review-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 28px; align-items: start; }
+  .ritem { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 14px 16px; border: 0; border-radius: 10px; background: none; text-align: left; cursor: pointer; }
+  .ritem:hover { background: var(--panel); }
+  .ritem.on { background: var(--brand-50); }
+  .ritem b { display: block; font-weight: 700; color: var(--ink); }
+  .ritem small { font-size: 14px; color: var(--muted); }
+  .ritem .st { font-size: 13px; font-weight: 700; color: var(--brand); }
+  .ritem .st.done { color: var(--faint); }
+  .list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .list li:first-child { border-top: 0; }
+  .list b { display: block; font-weight: 700; color: var(--ink); }
+  .list small { font-size: 14px; color: var(--muted); }
+  .tabs { display: flex; gap: 8px; margin-top: 24px; }
+  .report h2 { font-family: var(--serif); font-weight: 700; font-size: 28px; color: var(--navy); }
+  .report h3 { margin-top: 28px; font-size: 16px; font-weight: 700; }
+  .report p { margin-top: 8px; color: var(--body); }
+  .toast { position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); z-index: 50; transform: translate(-50%, -12px); opacity: 0; padding: 12px 18px; border-radius: 10px; background: var(--navy); color: #FFFFFF; font-size: 15px; font-weight: 500; box-shadow: 0 10px 25px -5px rgb(16 24 40 / .25); transition: opacity .2s ease, transform .2s ease; pointer-events: none; display: flex; align-items: center; gap: 10px; }
+  .toast svg { width: 18px; height: 18px; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ================= BREAKPOINTS ================= */
+  @media (max-width: 720px) {
+    .sbar .ctx { display: none; }
+    .sbar .in { flex-wrap: wrap; min-height: 0; }
+    .sbar .prog { order: 3; width: 100%; margin-left: 0; }
+    .sbar .who span:last-child { display: none; }
+    .sbar .who { margin-left: auto; }
+    .ladder { gap: 8px; }
+    .ladder b { font-size: 13px; }
+    .ladder small { font-size: 12px; }
+    .choice { font-size: 17px; padding: 16px; }
+    .qactions .btn { flex: 1 1 100%; }
+    .glossary { padding: 16px; gap: 10px 18px; font-size: 15px; }
+    .demobar span { display: none; }
+  }
+  @media (min-width: 1000px) {
+    .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .two-today { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+    .grid-main { grid-template-columns: minmax(0, 1fr) 340px; }
+    .review-grid { grid-template-columns: 320px minmax(0, 1fr); }
+    .gaprow { grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+    .tapp { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; min-height: 100svh; }
+    .side { position: sticky; top: 0; height: 100vh; height: 100svh; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 24px; padding: 28px 20px; border-bottom: 0; border-right: 1px solid var(--line); overflow-y: auto; }
+    .side .logo { margin: 0; padding: 0 8px; }
+    .classbtn { width: 100%; }
+    .tnav { order: 0; flex-direction: column; overflow: visible; }
+    .side .me { display: flex; align-items: center; gap: 12px; margin-top: auto; padding: 18px 8px 0; border-top: 1px solid var(--line); line-height: 1.3; }
+    .side .me b { display: block; font-weight: 700; }
+    .side .me small { font-size: 14px; color: var(--muted); }
+  }
+
+  @media print {
+    .demobar, .side, .noprint, .toast { display: none !important; }
+    .tapp { display: block; }
+    body { background: #FFFFFF; }
+    .card { box-shadow: none; }
+  }
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="demobar" aria-label="Demo views"><span>Demo</span><a href="#/s/today" data-demo="s">Student</a><a href="#/t/overview" data-demo="t">Teacher</a><a id="homelink" href="index.html">Home</a></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- icons ---------------- */
+  var I = {
+    stair: '<svg viewBox="0 0 32 28" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M1.5 27V18.5H10.5V10H19V1.5H30.5V27"/></svg>',
+    speaker: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+    check: '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3 3 7-7.5"/></svg>',
+    pencil: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
+    mic: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>',
+    play: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>',
+    plus: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    down: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>',
+    updown: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l4-4 4 4"/><path d="M8 15l4 4 4-4"/></svg>',
+    grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+    book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20v-9M12 20V5M19 20v-6"/></svg>'
+  };
+
+  /* ---------------- sample data ---------------- */
+  var PASSAGE = {
+    title: 'The Tryout',
+    paras: [
+      'Maya works at her family\u2019s food truck every Saturday. She takes orders and counts the money.',
+      'Today is different. The soccer tryout starts at 2:00. The line is long, and her dad is alone at the grill.',
+      'Maya looks at the clock. It is 1:15. She takes another order. She looks at the clock again. It is 1:30.',
+      'Her dad sees her face. \u201cGo,\u201d he says. \u201cI can do this.\u201d',
+      'Maya looks at the long line. Then she ties her apron tighter and takes the next order.'
+    ]
+  };
+  var RUNGS = [
+    { key: 'own', label: 'On your own', para: 5,
+      q: 'Read paragraph 5. What can you infer about Maya?',
+      choices: ['She will go to the tryout.', 'She is angry at her dad.', 'She will stay and help at the food truck.', 'She does not like soccer.'], correct: 2 },
+    { key: 'words', label: 'Key words', para: 5,
+      banner: ['Try a new question. The key words are explained.', 'Intenta una pregunta nueva. Las palabras clave tienen explicaci\u00f3n.'],
+      q: 'Read paragraph 5. Why does Maya [tie] her [apron] [tighter]?',
+      choices: ['Her apron is too big.', 'She is cold.', 'She [decides] to stay and help her dad.', 'She wants to leave early.'], correct: 2,
+      gloss: [['tie', 'to close something with a knot'], ['apron', 'clothes you wear over your clothes when you cook'], ['tighter', 'closer to your body, so it does not move'], ['decides', 'makes a choice']] },
+    { key: 'spanish', label: 'Spanish', para: 4,
+      banner: ['Try a new question. It is also in Spanish.', 'Intenta una pregunta nueva. Tambi\u00e9n est\u00e1 en espa\u00f1ol.'],
+      q: 'Read paragraph 4. Why does Maya\u2019s dad say \u201cGo\u201d?', qes: 'Lee el p\u00e1rrafo 4. \u00bfPor qu\u00e9 el pap\u00e1 de Maya dice \u201cVe\u201d?',
+      choices: ['He wants Maya to go to her tryout.', 'He is angry at Maya.', 'He wants to close the food truck.', 'He needs Maya to buy food.'],
+      choicesEs: ['Quiere que Maya vaya a su prueba.', 'Est\u00e1 enojado con Maya.', 'Quiere cerrar el cami\u00f3n de comida.', 'Necesita que Maya compre comida.'], correct: 0 },
+    { key: 'example', label: 'Example', para: 3,
+      banner: ['Look at the example first. Then try a new question.', 'Mira el ejemplo primero. Luego intenta una pregunta nueva.'],
+      q: 'Read paragraph 3. Why does Maya look at the clock two times?',
+      choices: ['The clock is broken.', 'She is thinking about the tryout.', 'Her dad asks her the time.', 'She wants to eat lunch.'], correct: 1 }
+  ];
+
+  var STUDENTS = [
+    ['ana', 'Ana L.', 'Pre-Production', 18, 'l', 'Language: vocabulary', 'Wednesday'],
+    ['yahir', 'Yahir P.', 'Beginning', 29, 'l', 'Language: vocabulary', 'Wednesday'],
+    ['mariana', 'Mariana S.', 'Beginning', 35, 'k', 'Skill: inference', 'Tuesday'],
+    ['daniela', 'Daniela R.', 'Beginning', 52, 'l', 'Language: vocabulary', 'Today'],
+    ['luis', 'Luis G.', 'Intermediate', 57, 'l', 'Language: question words', 'Today'],
+    ['jose', 'Jos\u00e9 M.', 'Intermediate', 62, 'k', 'Skill: inference', 'Today'],
+    ['kevin', 'Kevin T.', 'High Intermediate', 81, 'n', 'None', 'Today'],
+    ['camila', 'Camila F.', 'Advanced', 92, 'n', 'None', 'Monday'],
+    ['brayan', 'Brayan C.', 'Beginning', 33, 'l', 'Language: vocabulary', 'Tuesday'],
+    ['sofia', 'Sof\u00eda V.', 'Intermediate', 48, 'k', 'Skill: key ideas', 'Today'],
+    ['angel', '\u00c1ngel R.', 'Pre-Production', 22, 'l', 'Language: vocabulary', 'Today'],
+    ['valeria', 'Valeria M.', 'Intermediate', 66, 'k', 'Skill: summary', 'Monday'],
+    ['diego', 'Diego H.', 'Beginning', 41, 'l', 'Language: question words', 'Wednesday'],
+    ['ximena', 'Ximena T.', 'High Intermediate', 74, 'k', 'Skill: theme', 'Today'],
+    ['jonathan', 'Jonathan A.', 'Beginning', 38, 'l', 'Language: vocabulary', 'Tuesday'],
+    ['melanie', 'Melanie G.', 'Intermediate', 59, 'k', 'Skill: inference', 'Wednesday'],
+    ['emmanuel', 'Emmanuel O.', 'Pre-Production', 15, 'l', 'Language: vocabulary', 'Monday'],
+    ['andrea', 'Andrea P.', 'High Intermediate', 79, 'n', 'None', 'Today'],
+    ['christopher', 'Christopher L.', 'Intermediate', 54, 'l', 'Language: academic words', 'Tuesday'],
+    ['fatima', 'F\u00e1tima B.', 'Advanced', 88, 'n', 'None', 'Today']
+  ].map(function (r) { return { id: r[0], name: r[1], level: r[2], own: r[3], gapType: r[4], gap: r[5], last: r[6], initials: r[1].replace(/[^A-Z\u00c0-\u00de ]/g, '').split(' ').map(function (w) { return w.charAt(0); }).join('').slice(0, 2) }; });
+
+  var SKILLS = [
+    { code: 'E1.4F', name: 'Inference', lang: 31, skill: 15, note: ['lang', 'Mostly language.', 'Preteach tryout, apron, tighter.'] },
+    { code: 'E1.4G', name: 'Key ideas', lang: 9, skill: 19, note: ['sk', 'Mostly skill.', 'Reteach with a model and guided practice.'] },
+    { code: 'E1.5D', name: 'Summary', lang: 7, skill: 15, note: ['sk', 'Mostly skill.', 'Reteach with a model summary.'] },
+    { code: 'E1.6A', name: 'Theme', lang: 12, skill: 7, note: ['lang', 'Mostly language.', 'Preteach responsibility, choice.'] }
+  ];
+
+  var RESPONSES = [
+    { id: 'r1', sid: 'daniela', kind: 'Written', when: 'today', text: 'I think Maya make the right choice. In paragraph 5, the text says she ties her apron tighter and takes the next order. This show she care about her dad.', a: 1, c: 1, e: 0,
+      fb: 'Good answer and a strong detail from paragraph 5. Next step: tell why helping her dad matters more to Maya than the tryout. Watch the -s: makes, shows, cares.',
+      fbes: 'Buena respuesta y un detalle fuerte del p\u00e1rrafo 5. Siguiente paso: explica por qu\u00e9 ayudar a su pap\u00e1 es m\u00e1s importante para Maya que la prueba. Revisa la -s: makes, shows, cares.' },
+    { id: 'r2', sid: 'jose', kind: 'Spoken', when: 'today', len: '0:42', text: 'Maya stay with her dad because he need help. In paragraph 2 the line is long. This show she is responsible.', a: 1, c: 1, e: 1,
+      fb: 'Clear answer, a good detail, and a real explanation. Add -s to the verbs: stays, needs, shows.',
+      fbes: 'Respuesta clara, buen detalle y una explicaci\u00f3n real. Agrega -s a los verbos: stays, needs, shows.' },
+    { id: 'r3', sid: 'ana', kind: 'Written', when: 'Wednesday', text: 'Maya help dad. Paragraph 5.', a: 1, c: 0, e: 0,
+      fb: 'You know the answer. Next step: copy the words from paragraph 5 that show it. Use the frame: In paragraph 5, the text says ___.',
+      fbes: 'Sabes la respuesta. Siguiente paso: copia las palabras del p\u00e1rrafo 5 que lo muestran. Usa el marco: In paragraph 5, the text says ___.' },
+    { id: 'r4', sid: 'luis', kind: 'Written', when: 'today', text: 'I think Maya make a good choice because her dad is alone. Paragraph 2 says her dad is alone at the grill. This show family is important for Maya.', a: 1, c: 1, e: 1,
+      fb: 'Strong ACE answer. Your explanation connects the detail to Maya\u2019s values. Fix the -s: makes, shows.',
+      fbes: 'Muy buena respuesta ACE. Tu explicaci\u00f3n conecta el detalle con lo que Maya valora. Corrige la -s: makes, shows.' },
+    { id: 'r5', sid: 'yahir', kind: 'Spoken', when: 'Wednesday', len: '0:31', text: 'Maya stay. She help her dad. Paragraph 5.', a: 1, c: 0, e: 0,
+      fb: 'Good start. Next step: say the words from paragraph 5 that show Maya stays.',
+      fbes: 'Buen comienzo. Siguiente paso: di las palabras del p\u00e1rrafo 5 que muestran que Maya se queda.' },
+    { id: 'r6', sid: 'sofia', kind: 'Written', when: 'today', text: 'Maya made the right choice. In paragraph 5 she ties her apron and takes the next order. This shows she cares about her dad more than the tryout.', a: 1, c: 1, e: 1,
+      fb: 'Excellent. All three parts are complete, and your grammar is correct.',
+      fbes: 'Excelente. Las tres partes est\u00e1n completas y tu gram\u00e1tica es correcta.' }
+  ];
+
+  var TEXTS = [
+    { id: 'tryout', title: 'The Tryout', type: 'Fiction', level: 'Beginning', teks: ['E1.4F', 'E1.6A'], words: 110, about: 'Maya has a soccer tryout at 2:00, but her dad is alone at the family food truck.' },
+    { id: 'froze', title: 'The Week Texas Froze', type: 'Informational', level: 'Intermediate', teks: ['E1.4G', 'E1.5D'], words: 320, about: 'In February 2021, a winter storm left millions of Texans without power or water.' },
+    { id: 'phones', title: 'Should Phones Stay in Lockers?', type: 'Argument', level: 'High Intermediate', teks: ['E1.4F', 'E1.4G'], words: 410, about: 'Two students argue about a school rule that keeps phones in lockers all day.' },
+    { id: 'quince', title: 'The Dress', type: 'Fiction', level: 'Pre-Production', teks: ['E1.6A'], words: 70, about: 'Lucia wants a new dress for her cousin\u2019s quincea\u00f1era, but money is tight.' },
+    { id: 'monarchs', title: 'The Long Flight', type: 'Informational', level: 'Beginning', teks: ['E1.5D', 'E1.4G'], words: 150, about: 'Monarch butterflies fly through Texas on a trip of almost 3,000 miles.' },
+    { id: 'nightshift', title: 'The Night Shift', type: 'Fiction', level: 'Intermediate', teks: ['E1.4F', 'E1.6A'], words: 290, about: 'Andr\u00e9s works nights at a grocery store and tries to stay awake in first period.' },
+    { id: 'firstday', title: 'First Day in Dallas', type: 'Personal narrative', level: 'Beginning', teks: ['E1.6A', 'E1.4F'], words: 140, about: 'A new student remembers her first day at a big American high school.' },
+    { id: 'later', title: 'Should School Start Later?', type: 'Argument', level: 'Intermediate', teks: ['E1.4G', 'E1.5D'], words: 300, about: 'Doctors say teens need more sleep. Should high school start at 9:00?' }
+  ];
+  var SKILL_NAMES = { 'E1.4F': 'Making inferences', 'E1.4G': 'Key ideas', 'E1.5D': 'Summarizing', 'E1.6A': 'Theme' };
+
+  /* ---------------- state ---------------- */
+  var KEY = 'escalera-demo-v1';
+  var DEFAULT = {
+    rung: 0, done: false, finalRung: null, picked: null, checked: false,
+    ace: { a: 'I think Maya make the right choice.', c: 'In paragraph 5, the text says she ties her apron tighter and takes the next order.', e: 'This show she care about her dad.' },
+    mode: 'write', sent: false, reviewed: [], selResp: 'r1', fbEdits: {},
+    assignments: [
+      { title: 'The Tryout', skill: 'E1.4F', due: 'Thu, Oct 1', started: 18, total: 20 },
+      { title: 'The Week Texas Froze', skill: 'E1.4G', due: 'Mon, Oct 5', started: 6, total: 20 }
+    ],
+    sets: [{ name: 'The Tryout words', words: ['tryout', 'apron', 'tighter', 'grill', 'decides'] }],
+    sort: 'asc', filter: { level: '', gap: '', q: '' }, textFilter: { type: '', level: '', teks: '' }, reportTab: 'class', reportStudent: 'daniela'
+  };
+  var S;
+  try { S = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { S = null; }
+  if (!S) { S = JSON.parse(JSON.stringify(DEFAULT)); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  /* ---------------- helpers ---------------- */
+  var app = document.getElementById('app');
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function gl(s) { return esc(s).replace(/\[([^\]]+)\]/g, '<span class="gl">$1</span>'); }
+  function plain(s) { return s.replace(/\[|\]/g, ''); }
+  var toastTimer;
+  function toast(msg) { var t = document.getElementById('toast'); t.innerHTML = OKI + '<span>' + esc(msg) + '</span>'; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600); }
+  function speak(text, lang) {
+    if (!('speechSynthesis' in window)) { toast('Audio is not available in this browser.'); return; }
+    try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(text); u.lang = lang || 'en-US'; u.rate = 0.9; speechSynthesis.speak(u); } catch (e) { toast('Audio is not available in this browser.'); }
+  }
+  function student(id) { for (var i = 0; i < STUDENTS.length; i++) { if (STUDENTS[i].id === id) { return STUDENTS[i]; } } return STUDENTS[3]; }
+  function seeded(id, n) { var h = 0; for (var i = 0; i < id.length; i++) { h = (h * 31 + id.charCodeAt(i)) % 9973; } return ((h * (n + 7) * 7919) % 1000) / 1000; }
+  function supports() {
+    var q4 = S.done ? RUNGS[S.finalRung].key : 'words';
+    return ['own', 'own', 'own', q4 === 'own' ? 'own' : q4, 'own', 'words', 'own', 'own'].map(function (k, i) { return i === 3 ? q4 : k; });
+  }
+  function ownCount() { return supports().filter(function (k) { return k === 'own'; }).length; }
+  var reviewedCount = function () { return RESPONSES.filter(function (r) { return S.reviewed.indexOf(r.id) === -1; }).length; };
+
+    /* ---------------- shells ---------------- */
+  var OKI = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.86-9.81a.75.75 0 0 0-1.22-.88l-3.24 4.48-1.65-1.65a.75.75 0 1 0-1.06 1.06l2.27 2.27a.75.75 0 0 0 1.14-.09l3.76-5.19Z" clip-rule="evenodd"/></svg>';
+  var INFO = '';
+
+  function studentShell(inner, opts) {
+    opts = opts || {};
+    var ctx = opts.ctx ? '<div class="ctx"><b>' + opts.ctx[0] + '</b><small>' + opts.ctx[1] + '</small></div>' : '';
+    var prog = opts.prog ? '<div class="prog"><small>' + opts.prog[0] + '</small><div class="bar"><i style="width:' + opts.prog[1] + '%"></i></div></div>' : '';
+    return '<header class="sbar"><div class="in"><a class="logo" href="#/s/today" aria-label="Escalera home">' + I.stair + '<span>Escalera</span></a>' + ctx + prog +
+      '<div class="who"><span class="av">DR</span><span>Daniela R.</span></div></div></header><main class="smain" id="main">' + inner + '</main>';
+  }
+
+  function teacherShell(active, inner) {
+    var items = [['overview', 'Overview', I.grid], ['students', 'Students', I.users], ['review', 'Responses', I.chat], ['assign', 'Assignments', I.list], ['texts', 'Texts', I.book], ['reports', 'Reports', I.chart]];
+    var nav = items.map(function (it) {
+      var c = it[0] === 'review' && reviewedCount() ? '<span class="count">' + reviewedCount() + '</span>' : '';
+      return '<a class="navlink' + (active === it[0] ? ' on' : '') + '" href="#/t/' + it[0] + '"' + (active === it[0] ? ' aria-current="page"' : '') + '>' + it[2] + '<span>' + it[1] + '</span>' + c + '</a>';
+    }).join('');
+    return '<div class="tapp"><aside class="side" aria-label="Teacher navigation"><a class="logo" href="#/t/overview">' + I.stair + '<span>Escalera</span></a>' +
+      '<button class="classbtn" type="button" data-act="class"><span><b>ESOL I, 3rd block</b><small>20 students</small></span>' + I.updown + '</button>' +
+      '<nav class="tnav" aria-label="Teacher">' + nav + '</nav>' +
+      '<div class="me"><span class="av">MO</span><span><b>Ms. Ortiz</b><small>Teacher</small></span></div></aside>' +
+      '<main class="tmain" id="main">' + inner + '</main></div>';
+  }
+  function thead(title, sub, actions) {
+    return '<div class="tmain-head"><div><h1 class="h1">' + title + '</h1>' + (sub ? '<p class="h1-sub">' + sub + '</p>' : '') + '</div>' + (actions ? '<div class="row wrap-row">' + actions + '</div>' : '') + '</div>';
+  }
+
+  /* ================= STUDENT ================= */
+  function pJoin() {
+    return studentShell('<div class="center"><form class="card pad" data-form="join">' +
+      '<h1 class="hello">Join your class</h1><p class="hello-sub">\u00danete a tu clase</p>' +
+      '<div class="field mt-6"><label class="label" for="code">Class code<small>C\u00f3digo</small></label><input class="input" id="code" value="ORTIZ-3B" autocomplete="off"></div>' +
+      '<div class="field"><label class="label" for="nm">Your name<small>Tu nombre</small></label><select class="input" id="nm">' + STUDENTS.map(function (s) { return '<option' + (s.id === 'daniela' ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') + '</select></div>' +
+      '<button class="btn btn-primary btn-two mt-8" type="submit" style="width:100%;">Join<small>Entrar</small></button></form></div>');
+  }
+
+  function pToday() {
+    var week = [
+      ['done', 'Key ideas', 'Monday', '5 of 8'],
+      ['done', 'Summary', 'Tuesday', '4 of 8'],
+      [S.done ? 'done' : 'now', 'Inference', 'Today', S.done ? ownCount() + ' of 8' : 'In progress'],
+      ['', 'Theme', 'Thursday', '']
+    ];
+    return studentShell(
+      '<h1 class="hello">Hi, Daniela.</h1><p class="hello-sub">Hola, Daniela.</p>' +
+      '<div class="two two-today mt-8">' +
+        '<section class="card pad"><p class="kicker">Today\u2019s practice</p><h2 class="today-title mt-2">The Tryout</h2>' +
+        '<p class="mt-3" style="font-size:18px;max-width:34em;">Maya has a soccer tryout at 2:00, but her dad is alone at the family food truck.</p>' +
+        '<p class="meta">Making inferences, TEKS E1.4F. 8 questions. About 15 minutes.</p>' +
+        '<a class="btn btn-primary btn-two mt-8" href="#/s/practice">' + (S.done ? 'Review my practice' : 'Start practice') + '<small>' + (S.done ? 'Revisar' : 'Empezar') + '</small></a></section>' +
+        '<section class="card pad"><h2 class="card-title">This week</h2><ul class="week mt-4">' + week.map(function (w) {
+          return '<li><span class="dot ' + w[0] + '">' + (w[0] === 'done' ? I.check : '') + '</span><span><b>' + w[1] + '</b><small>' + w[2] + '</small></span><span class="score">' + w[3] + '</span></li>';
+        }).join('') + '</ul></section>' +
+      '</div>');
+  }
+
+  function pPractice() {
+    var r = RUNGS[S.rung];
+    var ladder = RUNGS.map(function (x, i) {
+      var cls = '', st = 'If needed';
+      if (S.done && i === S.finalRung) { cls = 'won'; st = 'Correct'; }
+      else if (i < S.rung || (S.done && i < S.finalRung)) { cls = 'missed'; st = 'Missed'; }
+      else if (i === S.rung && !S.done) { cls = 'now'; st = 'Now'; }
+      return '<div class="' + cls + '"><i></i><b>' + x.label + '</b><small>' + st + '</small></div>';
+    }).join('');
+    var paras = PASSAGE.paras.map(function (p, i) { return '<li class="' + (i + 1 === r.para ? 'hl' : '') + '"><span>' + (i + 1) + '</span>' + esc(p) + '</li>'; }).join('');
+    var banner = r.banner ? '<div class="banner" role="status"><b>' + r.banner[0] + '</b><span>' + r.banner[1] + '</span></div>' : '';
+    var gloss = r.gloss ? '<dl class="glossary">' + r.gloss.map(function (g) { return '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>'; }).join('') + '</dl>' : '';
+    var example = r.key === 'example' ? '<div class="example"><b>How to make an inference</b><ol><li>Find a detail. Paragraph 2 says her dad is \u201calone at the grill.\u201d<small>Busca un detalle.</small></li><li>Think about what you know. A long line is a lot of work for one person.<small>Piensa en lo que sabes.</small></li><li>Make the inference. Her dad needs help.<small>Haz la inferencia.</small></li></ol></div>' : '';
+    var choices = r.choices.map(function (c, i) {
+      var cls = S.picked === i ? ' sel' : '';
+      if (S.checked && S.picked === i) { cls = i === r.correct ? ' right' : ' wrong'; }
+      return '<label class="choice' + cls + '"><input type="radio" name="ans" value="' + i + '"' + (S.picked === i ? ' checked' : '') + (S.checked ? ' disabled' : '') + '><span>' + String.fromCharCode(65 + i) + '. ' + gl(c) + (r.choicesEs ? '<small>' + r.choicesEs[i] + '</small>' : '') + '</span></label>';
+    }).join('');
+    var result = '';
+    if (S.checked) {
+      if (S.picked === r.correct) {
+        var why = r.key === 'own' ? ['You got it on your own.', 'Lo hiciste sin ayuda.'] : r.key === 'example' ? ['Correct after the example.', 'Correcto despu\u00e9s del ejemplo.'] : ['Correct with ' + (r.key === 'words' ? 'the key words.' : 'Spanish.'), (r.key === 'words' ? 'Correcto con las palabras clave.' : 'Correcto en espa\u00f1ol.') + ' Next, you will practice tie, apron, and tighter.'];
+        result = '<div class="result ok" role="status"><b>' + why[0] + '</b><p>' + why[1] + '</p><a class="btn btn-two" href="#/s/respond">Continue<small>Continuar</small></a></div>';
+      } else if (S.rung < RUNGS.length - 1) {
+        result = '<div class="result no" role="status"><b>Not this time.</b><p>Esta vez no. Try a new question with more help.</p><button class="btn btn-primary btn-two" type="button" data-act="climb">Next try<small>Siguiente intento</small></button></div>';
+      } else {
+        result = '<div class="result no" role="status"><b>The answer is B.</b><p>Maya looks at the clock because she is thinking about the tryout.</p><a class="btn btn-primary btn-two" href="#/s/respond">Continue<small>Continuar</small></a></div>';
+      }
+    }
+    return studentShell(
+      '<div class="two">' +
+        '<article class="card pad" aria-labelledby="pt"><div class="between"><h1 class="ptitle" id="pt">' + PASSAGE.title + '</h1><button class="btn btn-secondary" type="button" data-act="listen">' + I.speaker + 'Listen</button></div><ol class="paras">' + paras + '</ol></article>' +
+        '<section class="card pad" aria-label="Question"><div class="ladder" aria-label="Support ladder">' + ladder + '</div>' + banner +
+        '<p class="qtext">' + gl(r.q) + '</p>' + (r.qes ? '<p class="qes">' + r.qes + '</p>' : '') + gloss + example +
+        '<fieldset style="border:0;padding:0;margin:0;min-width:0;"><legend class="sr">Answer choices</legend><div class="choices">' + choices + '</div></fieldset>' +
+        (S.checked ? result : '<div class="qactions"><button class="btn btn-secondary" type="button" data-act="hear">' + I.speaker + 'Hear the question</button><button class="btn btn-primary btn-two" type="button" data-act="check"' + (S.picked === null ? ' disabled' : '') + '>Check answer<small>Revisar respuesta</small></button></div>') +
+        '</section></div>',
+      { ctx: ['Making inferences', 'TEKS E1.4F'], prog: ['Question 4 of 8', 50] });
+  }
+
+  function grade(t) {
+    var a = /maya/i.test(t.a) && /(right|wrong|good|bad|best)/i.test(t.a);
+    var c = /paragraph\s*\d/i.test(t.c) && t.c.length > 25;
+    var e = t.e.length > 30 && /(because|more than|matters|important|so that|instead)/i.test(t.e);
+    var fixes = [], seen = {}, all = [t.a, t.c, t.e].join(' ');
+    var re = /\b(she|he|it|this|maya)\s+(make|show|care|help|stay|need|tie|take|want|look|go|think|decide|love|work)\b/gi, m;
+    while ((m = re.exec(all))) { var k = m[0].toLowerCase(); if (!seen[k]) { seen[k] = 1; fixes.push([m[1], m[2]]); } }
+    return { a: a, c: c, e: e, fixes: fixes };
+  }
+
+  function pRespond() {
+    var g = grade(S.ace);
+    function item(ok, title, en, es) { return '<li><span class="mark' + (ok ? ' met' : '') + '">' + (ok ? I.check : '') + '</span><div><b>' + title + ': <span>' + (ok ? 'met' : 'next step') + '</span></b><p>' + en + '</p><p class="es">' + es + '</p></div></li>'; }
+    var fb = '<ul class="fb mt-4">' +
+      item(g.a, 'Answer', g.a ? 'You answered the question clearly.' : 'Say if Maya made the right choice.', g.a ? 'Respondiste la pregunta con claridad.' : 'Di si Maya tom\u00f3 la decisi\u00f3n correcta.') +
+      item(g.c, 'Cite', g.c ? 'You used a good detail from paragraph 5.' : 'Give a detail and the paragraph number.', g.c ? 'Usaste un buen detalle del p\u00e1rrafo 5.' : 'Da un detalle y el n\u00famero del p\u00e1rrafo.') +
+      item(g.e, 'Explain', g.e ? 'You explained why the detail matters.' : 'Tell why helping her dad matters more to Maya than the tryout.', g.e ? 'Explicaste por qu\u00e9 el detalle es importante.' : 'Explica por qu\u00e9 ayudar a su pap\u00e1 es m\u00e1s importante para Maya que la prueba de f\u00fatbol.') + '</ul>';
+    var gram = g.fixes.length ? '<div class="gram"><b>Grammar: add -s to the verb</b><p>With <i>he</i>, <i>she</i>, <i>it</i>, <i>this</i>, or one person\u2019s name, add -s to the verb.</p><p class="es">Con <i>he</i>, <i>she</i>, <i>it</i>, <i>this</i> o el nombre de una persona, agrega -s al verbo.</p><div class="fixes">' +
+      g.fixes.map(function (f) { return '<span>' + esc(f[0]) + ' <s>' + esc(f[1]) + '</s> <b>' + esc(f[1]) + 's</b></span>'; }).join('') + '</div></div>' : '';
+    function ace(l, key, label, frame) { return '<div class="ace"><span class="ltr" aria-hidden="true">' + l + '</span><div><label class="label" for="a' + key + '">' + label + '<small>' + frame + '</small></label><textarea class="input" id="a' + key + '" data-ace="' + key + '" rows="2">' + esc(S.ace[key]) + '</textarea></div></div>'; }
+    var write = ace('A', 'a', 'Answer', 'I think Maya ___ because ___.') + ace('C', 'c', 'Cite', 'In paragraph ___, the text says ___.') + ace('E', 'e', 'Explain', 'This shows that ___.');
+    var speakUi = '<div class="rec"><button class="mic" type="button" data-act="rec" aria-label="Record your answer">' + I.mic + '</button><p class="mt-4" style="font-weight:600;" id="rectext">Tap to record your answer</p><p class="muted mt-1" style="font-size:14px;">Toca para grabar.</p></div>';
+    return studentShell(
+      '<div class="two">' +
+        '<section class="card pad" aria-labelledby="aq"><h1 class="card-title" id="aq" style="font-size:clamp(26px,2.4vw,32px);">Did Maya make the right choice? Use one detail from the text.</h1><p class="card-sub">\u00bfMaya tom\u00f3 la decisi\u00f3n correcta? Usa un detalle del texto.</p>' +
+        '<div class="seg mt-6" role="group" aria-label="Answer mode"><button type="button" data-act="mode" data-mode="write" aria-pressed="' + (S.mode === 'write') + '">' + I.pencil + 'Write</button><button type="button" data-act="mode" data-mode="speak" aria-pressed="' + (S.mode === 'speak') + '">' + I.mic + 'Speak</button></div>' +
+        (S.mode === 'write' ? write : speakUi) +
+        '<div class="qactions"><button class="btn btn-secondary btn-two" type="button" data-act="regrade">Fix my answer<small>Corregir mi respuesta</small></button><button class="btn btn-primary btn-two" type="button" data-act="send">Send to my teacher<small>Enviar a mi docente</small></button></div></section>' +
+        '<section class="card pad" aria-labelledby="fbt"><div class="between"><h2 class="card-title" id="fbt">Feedback</h2><span class="muted">Comentarios</span></div>' + fb + gram +
+        '<p class="muted mt-6">Your teacher will see your answer and this feedback.<br>Tu docente ver\u00e1 tu respuesta y estos comentarios.</p></section>' +
+      '</div>',
+      { ctx: ['Making inferences', 'TEKS E1.4F'], prog: ['Last step: your answer', 100] });
+  }
+
+  function blocks(list, label) { return list.map(function (k, i) { return '<div><i class="' + (k === 'own' ? '' : k) + '"></i>' + (label ? 'Q' + (i + 1) : '') + '</div>'; }).join(''); }
+  function legend() { return '<div class="legend"><span><i></i>No support</span><span><i class="words"></i>Key words</span><span><i class="spanish"></i>Spanish</span><span><i class="example"></i>Worked example</span></div>'; }
+
+  function pResults() {
+    return studentShell(
+      '<div class="two">' +
+        '<section class="card pad"><p class="kicker">Session complete</p><p class="big mt-4">' + ownCount() + ' of 8</p><p class="mt-2" style="font-size:18px;font-weight:600;">correct on your own</p><p class="muted">correctas sin ayuda</p>' +
+        '<div class="qblocks" aria-label="Support on each question">' + blocks(supports(), true) + '</div>' + legend() + '</section>' +
+        '<section class="card pad"><h2 class="card-title">Words to practice</h2><p class="card-sub">Palabras para practicar</p><div class="chips mt-4"><span class="chip">tie <small>amarrar</small></span><span class="chip">apron <small>delantal</small></span><span class="chip">tighter <small>m\u00e1s apretado</small></span></div>' +
+        '<hr class="divider"><p>' + (S.sent ? 'Your answer was sent to Ms. Ortiz.' : 'Your answer is not sent yet.') + '</p><div class="row wrap-row mt-6"><button class="btn btn-primary" type="button" data-act="words">Practice these words</button><a class="btn btn-secondary" href="#/s/today">Back to today</a></div></section>' +
+      '</div>',
+      { ctx: ['Making inferences', 'TEKS E1.4F'], prog: ['Session complete', 100] });
+  }
+
+  function pProgress() { return pResults(); }
+
+  /* ================= TEACHER ================= */
+  var GAPLEGEND = '<div class="gap-legend"><span><i></i><b>Language gap</b> right with key words or Spanish</span><span><i class="k"></i><b>Skill gap</b> needed the worked example</span></div>';
+  function gapRows(list, max) {
+    return list.map(function (s) {
+      return '<div class="gaprow"><span class="nm">' + s.name + '<small>' + s.code + '</small></span><div><div class="split" role="img" aria-label="' + s.lang + ' language gaps and ' + s.skill + ' skill gaps"><span class="l" style="width:' + (s.lang / max * 100).toFixed(1) + '%"></span><span class="k" style="width:' + (s.skill / max * 100).toFixed(1) + '%"></span></div><p class="cap">' + (s.lang + s.skill) + ' missed: ' + s.lang + ' language, ' + s.skill + ' skill</p></div>' +
+        '<p class="recom"><span class="' + s.note[0] + '">' + s.note[1] + '</span> ' + s.note[2] + '</p></div>';
+    }).join('');
+  }
+  function ownCell(v) { return '<span class="own"><em>' + v + '%</em><span class="meter"><i style="width:' + v + '%"></i></span></span>'; }
+  function gapCell(s) { return '<span class="gapdot"><i class="' + (s.gapType === 'k' ? 'k' : s.gapType === 'n' ? 'n' : '') + '"></i>' + s.gap + '</span>'; }
+  function studentRows(list) {
+    return list.map(function (s) { return '<tr class="link" data-go="#/t/student/' + s.id + '"><td class="name"><a href="#/t/student/' + s.id + '">' + esc(s.name) + '</a></td><td>' + s.level + '</td><td>' + ownCell(s.own) + '</td><td>' + gapCell(s) + '</td><td>' + s.last + '</td></tr>'; }).join('');
+  }
+  function respItems(n) {
+    var open = RESPONSES.filter(function (r) { return S.reviewed.indexOf(r.id) === -1; });
+    if (!open.length) { return '<p class="muted mt-4">All caught up.</p>'; }
+    return '<div class="mt-4">' + open.slice(0, n).map(function (r) {
+      var st = student(r.sid);
+      var media = r.kind === 'Spoken' ? '<div class="player"><button type="button" data-act="playq" data-rid="' + r.id + '" aria-label="Play">' + I.play + '</button><div class="track"><i></i></div><span class="muted" style="font-size:14px;">' + r.len + '</span></div>' : '';
+      return '<div class="resp"><div class="person"><span class="av">' + st.initials + '</span><span><b>' + esc(st.name) + '</b><small>' + r.kind + ', ' + r.when + '</small></span><a class="btn btn-secondary" href="#/t/review/' + r.id + '">Review</a></div>' + media + '<p class="excerpt">\u201c' + esc(r.text) + '\u201d</p></div>';
+    }).join('') + '</div>';
+  }
+  var TABLE_HEAD = '<thead><tr><th>Student</th><th>ELPS level</th><th aria-sort="' + 'ascending' + '">On their own \u2191</th><th>Main gap</th><th>Last practice</th></tr></thead>';
+
+  function pOverview() {
+    var top8 = ['ana', 'yahir', 'mariana', 'daniela', 'luis', 'jose', 'kevin', 'camila'].map(student).sort(function (a, b) { return a.own - b.own; });
+    return teacherShell('overview',
+      thead('Overview', 'ESOL I, 3rd block. Week of September 28.', '<a class="btn btn-secondary" href="#/t/reports">' + I.down + 'Download report</a><a class="btn btn-primary" href="#/t/assign">' + I.plus + 'Assign practice</a>') +
+      '<p class="summary">This week, students finished 54 sessions. <a href="#/t/review">' + reviewedCount() + ' responses</a> are waiting for your review.</p>' +
+      '<div class="grid-main"><div class="stack">' +
+        '<section class="card pad"><h2 class="card-title">Why students missed questions</h2>' + GAPLEGEND + '<div class="mt-4">' + gapRows(SKILLS, 46) + '</div></section>' +
+        '<section class="card pad"><div class="between"><h2 class="card-title">Students</h2><a href="#/t/students">See all 20</a></div><div class="tbl-wrap"><table class="tbl">' + TABLE_HEAD + '<tbody>' + studentRows(top8) + '</tbody></table></div><p class="muted mt-4" style="font-size:14px;">On their own: questions answered correctly with no support this week.</p></section>' +
+      '</div><div class="stack">' +
+        '<section class="card pad"><div class="between"><h2 class="card-title" style="font-size:21px;white-space:nowrap;">Responses to review</h2><span class="count">' + reviewedCount() + '</span></div>' + respItems(3) + '<p class="mt-4"><a href="#/t/review">See all responses</a></p></section>' +
+        '<section class="card pad"><h2 class="card-title">Words to preteach</h2><p class="card-sub">How many students needed each word explained this week.</p><div class="chips mt-4"><span class="chip">tryout <small>9</small></span><span class="chip">apron <small>7</small></span><span class="chip">responsibility <small>7</small></span><span class="chip">tighter <small>6</small></span><span class="chip">grill <small>5</small></span><span class="chip">choice <small>4</small></span></div>' +
+        '<button class="btn btn-secondary mt-6" type="button" data-act="makeset">' + I.plus + 'Make a vocabulary set</button></section>' +
+      '</div></div>');
+  }
+
+  function pStudents() {
+    var list = STUDENTS.slice().sort(function (a, b) { return S.sort === 'asc' ? a.own - b.own : b.own - a.own; });
+    return teacherShell('students',
+      thead('Students', 'ESOL I, 3rd block. 20 students.', '<a class="btn btn-primary" href="#/t/assign">' + I.plus + 'Assign practice</a>') +
+      '<section class="card pad mt-8"><div class="tbl-wrap" style="margin-top:0;"><table class="tbl"><thead><tr><th>Student</th><th>ELPS level</th><th aria-sort="' + (S.sort === 'asc' ? 'ascending' : 'descending') + '"><button type="button" data-act="sort">On their own ' + (S.sort === 'asc' ? '\u2191' : '\u2193') + '</button></th><th>Main gap</th><th>Last practice</th></tr></thead><tbody>' + studentRows(list) + '</tbody></table></div></section>');
+  }
+
+  function pStudent(id) {
+    var s = student(id);
+    var rows = SKILLS.map(function (k, i) {
+      var t = Math.round(4 + seeded(s.id, i) * 10), lf = s.gapType === 'l' ? 0.7 : s.gapType === 'k' ? 0.3 : 0.5;
+      if (s.gapType === 'n') { t = Math.round(1 + seeded(s.id, i) * 3); }
+      var l = Math.round(t * lf), sk = t - l;
+      return { name: k.name, code: k.code, lang: l, skill: sk, note: l >= sk ? ['lang', 'Mostly language.', 'Preteach the key words.'] : ['sk', 'Mostly skill.', 'Reteach with a model.'] };
+    });
+    var max = Math.max.apply(null, rows.map(function (r) { return r.lang + r.skill; })) || 1;
+    var mine = RESPONSES.filter(function (r) { return r.sid === s.id; });
+    var last = s.id === 'daniela' ? supports() : ['own', 'own', s.own > 60 ? 'own' : 'words', 'own', s.gapType === 'k' ? 'example' : 'spanish', 'own', s.own > 50 ? 'own' : 'words', s.own > 80 ? 'own' : 'words'];
+    return teacherShell('students',
+      '<p><a href="#/t/students">\u2190 Students</a></p><div class="mt-4">' + thead(esc(s.name), s.level + '. ' + s.own + '% on their own this week. Main gap: ' + s.gap.toLowerCase() + '.', '<button class="btn btn-secondary" type="button" data-act="report" data-sid="' + s.id + '">' + I.down + 'Progress report</button>') + '</div>' +
+      '<div class="grid-main"><div class="stack">' +
+        '<section class="card pad"><h2 class="card-title">Why ' + esc(s.name.split(' ')[0]) + ' missed questions</h2>' + GAPLEGEND + '<div class="mt-4">' + gapRows(rows, max) + '</div></section>' +
+      '</div><div class="stack">' +
+        '<section class="card pad"><h2 class="card-title">Last session</h2><p class="card-sub">The Tryout. Each block is one question.</p><div class="qblocks">' + blocks(last, true) + '</div>' + legend() + '</section>' +
+        (mine.length ? '<section class="card pad"><h2 class="card-title">Responses</h2>' + mine.map(function (r) { return '<div class="resp" style="border-top:0;"><div class="person"><span><b>' + r.kind + ', ' + r.when + '</b></span><a class="btn btn-secondary" href="#/t/review/' + r.id + '">Review</a></div><p class="excerpt">\u201c' + esc(r.text) + '\u201d</p></div>'; }).join('') + '</section>' : '') +
+      '</div></div>');
+  }
+
+  function pReview(rid) {
+    var cur = null;
+    for (var i = 0; i < RESPONSES.length; i++) { if (RESPONSES[i].id === (rid || S.selResp)) { cur = RESPONSES[i]; } }
+    if (!cur) { cur = RESPONSES[0]; }
+    S.selResp = cur.id;
+    var st = student(cur.sid), done = S.reviewed.indexOf(cur.id) > -1, ed = S.fbEdits[cur.id] || {};
+    var list = RESPONSES.map(function (r) { var s2 = student(r.sid), d = S.reviewed.indexOf(r.id) > -1; return '<button type="button" class="ritem' + (r.id === cur.id ? ' on' : '') + '" data-go="#/t/review/' + r.id + '"><span class="av">' + s2.initials + '</span><span><b>' + esc(s2.name) + '</b><small>' + r.kind + ', ' + r.when + '</small></span><span class="st' + (d ? ' done' : '') + '">' + (d ? 'Sent' : 'New') + '</span></button>'; }).join('');
+    var media = cur.kind === 'Spoken' ? '<div class="player"><button type="button" data-act="play" aria-label="Play">' + I.play + '</button><div class="track"><i id="ptrack"></i></div><span class="muted" style="font-size:14px;">' + cur.len + '</span></div>' : '';
+    return teacherShell('review',
+      thead('Responses', reviewedCount() + ' waiting for your review.') +
+      '<div class="review-grid"><section class="card" style="padding:8px;">' + list + '</section>' +
+      '<section class="card pad"><div class="person"><span class="av">' + st.initials + '</span><span><b>' + esc(st.name) + '</b><small>' + cur.kind + ', ' + cur.when + '</small></span><a href="#/t/student/' + st.id + '" style="margin-left:auto;">Profile</a></div>' +
+      '<p class="mt-6" style="font-weight:700;">Did Maya make the right choice? Use one detail from the text.</p>' + media + '<p class="quote">' + esc(cur.text) + '</p>' +
+      '<div class="rub mt-4">' + ['a', 'c', 'e'].map(function (k, j) { var on = ed['r' + k] !== undefined ? ed['r' + k] : !!cur[k]; return '<label><input type="checkbox" data-rub="' + k + '"' + (on ? ' checked' : '') + '>' + ['Answer', 'Cite', 'Explain'][j] + '</label>'; }).join('') + '</div>' +
+      '<div class="field mt-6"><label class="label" for="fen">Feedback</label><textarea class="input" id="fen" data-fb="en" rows="3">' + esc(ed.en !== undefined ? ed.en : cur.fb) + '</textarea></div>' +
+      '<div class="field"><label class="label" for="fes">Comentarios en espa\u00f1ol</label><textarea class="input" id="fes" data-fb="es" rows="3">' + esc(ed.es !== undefined ? ed.es : cur.fbes) + '</textarea></div>' +
+      '<div class="qactions"><span class="muted" style="font-size:14px;">' + (done ? 'Sent to ' + esc(st.name.split(' ')[0]) + '.' : 'Drafted by Escalera. Edit before you send.') + '</span><button class="btn btn-primary" type="button" data-act="sendfb">' + (done ? 'Send again' : 'Send to student') + '</button></div></section></div>');
+  }
+
+  function pAssign() {
+    var opts = Object.keys(SKILL_NAMES).map(function (c) { return '<option value="' + c + '">' + c + ', ' + SKILL_NAMES[c] + '</option>'; }).join('');
+    return teacherShell('assign',
+      thead('Assignments', 'Escalera adjusts support for each student.') +
+      '<div class="grid-main"><form class="card pad" data-form="assign"><h2 class="card-title">Assign practice</h2>' +
+      '<div class="field mt-6"><label class="label" for="askill">Skill</label><select class="input" id="askill" data-act-change="skill">' + opts + '</select></div>' +
+      '<div class="field"><label class="label" for="atext">Passage</label><select class="input" id="atext" data-act-change="text"></select></div>' +
+      '<div class="field"><label class="label" for="adue">Due</label><input class="input" id="adue" type="date" value="2026-10-08"></div>' +
+      '<input type="hidden" id="aq" value="8"><div id="apreview" class="mt-6"></div>' +
+      '<button class="btn btn-primary mt-8" type="submit">Assign to 20 students</button></form>' +
+      '<section class="card pad"><h2 class="card-title">Current</h2><ul class="list mt-4">' + S.assignments.map(function (a) { return '<li><span><b>' + esc(a.title) + '</b><small>' + SKILL_NAMES[a.skill] + '. Due ' + a.due + '.</small></span><span class="muted" style="font-size:14px;">' + a.started + ' of ' + a.total + '</span></li>'; }).join('') + '</ul></section></div>');
+  }
+
+  function pTexts() {
+    return teacherShell('texts',
+      thead('Texts', 'Original passages for teens, tagged to the English I TEKS and the 2024 ELPS.') +
+      '<section class="card pad mt-8"><div class="tbl-wrap" style="margin-top:0;"><table class="tbl"><thead><tr><th>Title</th><th>Type</th><th>ELPS level</th><th>TEKS</th><th></th></tr></thead><tbody>' +
+      TEXTS.map(function (t) { return '<tr><td class="name"><b>' + esc(t.title) + '</b></td><td>' + t.type + '</td><td>' + t.level + '</td><td>' + t.teks.join(', ') + '</td><td style="text-align:right;"><button class="btn btn-secondary" type="button" data-act="assigntext" data-text="' + t.id + '" style="min-height:36px;padding:4px 14px;">Assign</button></td></tr>'; }).join('') +
+      '</tbody></table></div></section>' +
+      '<section class="card pad mt-8" id="sets"><div class="between wrap-row"><h2 class="card-title">Vocabulary sets</h2><button class="btn btn-secondary" type="button" data-act="makeset">' + I.plus + 'Make a set</button></div>' +
+      S.sets.map(function (s) { return '<div class="mt-6"><b>' + esc(s.name) + '</b><div class="chips mt-3">' + s.words.map(function (w) { return '<span class="chip">' + esc(w) + '</span>'; }).join('') + '</div></div>'; }).join('') + '</section>');
+  }
+
+  function pReports() {
+    var s = student(S.reportStudent);
+    var body = S.reportTab === 'class'
+      ? '<h2>Weekly class summary</h2><p class="muted" style="margin-top:4px;">ESOL I, 3rd block. Week of September 28, 2026.</p><p>Students finished 54 sessions. They missed 115 questions: 59 language gaps and 56 skill gaps.</p>' + GAPLEGEND + '<div class="mt-4">' + gapRows(SKILLS, 46) + '</div><h3>Next steps</h3><p>Preteach tryout, apron, tighter, responsibility, and choice. Reteach key ideas and summarizing with a model.</p>'
+      : '<h2>' + esc(s.name) + '</h2><p class="muted" style="margin-top:4px;">Progress report. ' + s.level + '. For an LPAC or family meeting.</p><p>' + (s.id === 'daniela' ? 'Daniela went from 1 of 8 correct on her own (Sept 14) to 6 of 8 (Sept 28). She most often needs key words explained, which points to vocabulary. The inference skill itself is solid.' : esc(s.name.split(' ')[0]) + ' answered ' + s.own + '% of questions correctly with no support this week. Main area to grow: ' + s.gap.toLowerCase() + '.') + '</p><h3>Recommended supports</h3><p>Preteach key vocabulary. Keep Spanish support on new skills. Continue weekly spoken ACE responses for TELPAS practice.</p>';
+    return teacherShell('reports',
+      '<div class="noprint">' + thead('Reports', 'Print a report or save it as a PDF.', '<button class="btn btn-primary" type="button" data-act="print">' + I.down + 'Print or save as PDF</button>') +
+      '<div class="tabs seg" role="group" aria-label="Report"><button type="button" data-act="rtab" data-tab="class" aria-pressed="' + (S.reportTab === 'class') + '">Class summary</button><button type="button" data-act="rtab" data-tab="student" aria-pressed="' + (S.reportTab === 'student') + '">Student report</button></div>' +
+      (S.reportTab === 'student' ? '<div class="field mt-4" style="max-width:320px;"><label class="sr" for="rs">Student</label><select class="input" id="rs" data-act-change="rstudent">' + STUDENTS.map(function (x) { return '<option value="' + x.id + '"' + (x.id === s.id ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select></div>' : '') + '</div>' +
+      '<article class="card pad report mt-6">' + body + '</article>');
+  }
+
+/* ---------------- assign preview ---------------- */
+  function fillAssign() {
+    var sk = document.getElementById('askill'), tx = document.getElementById('atext'), pv = document.getElementById('apreview');
+    if (!sk || !tx || !pv) { return; }
+    var want = tx.getAttribute('data-want');
+    var list = TEXTS.filter(function (t) { return t.teks.indexOf(sk.value) > -1; });
+    tx.innerHTML = list.map(function (t) { return '<option value="' + t.id + '"' + (want === t.id ? ' selected' : '') + '>' + esc(t.title) + ' (' + t.level + ')</option>'; }).join('');
+    var t = list.filter(function (x) { return x.id === tx.value; })[0] || list[0];
+    pv.innerHTML = '<div class="example" style="margin-top:0;"><b>' + esc(t.title) + '</b><p class="mt-1">' + esc(t.about) + '</p><p class="muted mt-2" style="font-size:14px;">' + t.type + ', ' + t.level + '. ' + SKILL_NAMES[sk.value] + '. After a miss, each student climbs the ladder.</p></div>';
+  }
+
+  /* ---------------- router ---------------- */
+  function route() {
+    var h = (location.hash || '#/s/join').slice(1).split('/');
+    var area = h[1], page = h[2], arg = h[3];
+    var html;
+    if (area === 't') {
+      html = page === 'students' ? pStudents() : page === 'student' ? pStudent(arg) : page === 'review' ? pReview(arg) : page === 'assign' ? pAssign() : page === 'texts' ? pTexts() : page === 'reports' ? pReports() : pOverview();
+    } else {
+      html = page === 'today' ? pToday() : page === 'practice' ? pPractice() : page === 'respond' ? pRespond() : page === 'results' ? pResults() : page === 'progress' ? pProgress() : pJoin();
+    }
+    app.innerHTML = html;
+    document.querySelectorAll('.demobar [data-demo]').forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-demo') === (area === 't' ? 't' : 's')); });
+    if (area === 't' && page === 'assign') { fillAssign(); }
+    save();
+  }
+  function rerender(keepScroll) { var y = window.scrollY; route(); if (keepScroll) { window.scrollTo(0, y); } }
+  window.addEventListener('hashchange', function () { route(); window.scrollTo(0, 0); });
+
+  /* ---------------- events ---------------- */
+  document.addEventListener('click', function (e) {
+    var go = e.target.closest('[data-go]');
+    if (go && !e.target.closest('a')) { location.hash = go.getAttribute('data-go'); return; }
+    var b = e.target.closest('[data-act]');
+    if (!b) { return; }
+    var act = b.getAttribute('data-act');
+    if (act === 'seg') { b.parentNode.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); }
+    else if (act === 'listen') { speak(PASSAGE.paras.join(' '), 'en-US'); }
+    else if (act === 'hear') { var r = RUNGS[S.rung]; speak(plain(r.q) + ' ' + r.choices.map(function (c, i) { return String.fromCharCode(65 + i) + '. ' + plain(c); }).join(' '), 'en-US'); if (r.qes) { setTimeout(function () { speak(r.qes, 'es-MX'); }, 50); } }
+    else if (act === 'check') { if (S.picked === null) { return; } S.checked = true; if (S.picked === RUNGS[S.rung].correct || S.rung === RUNGS.length - 1) { S.done = true; S.finalRung = S.rung; } rerender(true); }
+    else if (act === 'climb') { S.rung = Math.min(RUNGS.length - 1, S.rung + 1); S.picked = null; S.checked = false; rerender(true); }
+    else if (act === 'mode') { S.mode = b.getAttribute('data-mode'); rerender(true); }
+    else if (act === 'regrade') { rerender(true); toast('Feedback updated.'); }
+    else if (act === 'send') { S.sent = true; location.hash = '#/s/results'; setTimeout(function () { toast('Sent to Ms. Ortiz.'); }, 100); }
+    else if (act === 'rec') {
+      var t = document.getElementById('rectext');
+      if (b.classList.contains('on')) { b.classList.remove('on'); t.textContent = 'Recorded 0:38. Tap to record again.'; toast('Recording saved. This demo does not keep audio.'); }
+      else { b.classList.add('on'); t.textContent = 'Recording\u2026 tap to stop'; }
+    }
+    else if (act === 'words') { toast('Word practice starts with tie, apron, and tighter.'); }
+    else if (act === 'makeset') { S.sets.unshift({ name: 'Week of Sept 28 words', words: ['tryout', 'apron', 'responsibility', 'tighter', 'grill', 'choice'] }); save(); location.hash = '#/t/texts'; setTimeout(function () { var el = document.getElementById('sets'); if (el) { el.scrollIntoView({ behavior: 'smooth' }); } toast('Vocabulary set made from this week\u2019s words.'); }, 60); }
+    else if (act === 'sort') { S.sort = S.sort === 'asc' ? 'desc' : 'asc'; rerender(true); }
+    else if (act === 'class') { toast('This demo has one class.'); }
+    else if (act === 'play') {
+      var cur = RESPONSES.filter(function (r) { return r.id === S.selResp; })[0], tr = document.getElementById('ptrack');
+      speak(cur.text, 'en-US');
+      if (tr) { tr.style.transition = 'none'; tr.style.width = '0'; requestAnimationFrame(function () { tr.style.transition = 'width 6s linear'; tr.style.width = '100%'; }); }
+    }
+    else if (act === 'playq') { var rq = RESPONSES.filter(function (x) { return x.id === b.getAttribute('data-rid'); })[0]; if (rq) { speak(rq.text, 'en-US'); var tk = b.parentNode.querySelector('.track i'); if (tk) { tk.style.transition = 'none'; tk.style.width = '0'; requestAnimationFrame(function () { tk.style.transition = 'width 6s linear'; tk.style.width = '100%'; }); } } }
+    else if (act === 'sendfb') {
+      if (S.reviewed.indexOf(S.selResp) === -1) { S.reviewed.push(S.selResp); }
+      var nxt = RESPONSES.filter(function (r) { return S.reviewed.indexOf(r.id) === -1; })[0];
+      save(); toast('Feedback sent.');
+      if (nxt) { location.hash = '#/t/review/' + nxt.id; } else { rerender(true); }
+    }
+    else if (act === 'assigntext') { location.hash = '#/t/assign'; var id = b.getAttribute('data-text'); setTimeout(function () { var t = TEXTS.filter(function (x) { return x.id === id; })[0]; var sk = document.getElementById('askill'); if (sk && t) { sk.value = t.teks[0]; document.getElementById('atext').setAttribute('data-want', t.id); fillAssign(); } }, 30); }
+    else if (act === 'rtab') { S.reportTab = b.getAttribute('data-tab'); rerender(true); }
+    else if (act === 'report') { S.reportTab = 'student'; S.reportStudent = b.getAttribute('data-sid'); location.hash = '#/t/reports'; }
+    else if (act === 'print') { window.print(); }
+  });
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.name === 'ans') { S.picked = +t.value; rerender(true); return; }
+    if (t.hasAttribute('data-filter')) { S.filter[t.getAttribute('data-filter')] = t.value; rerender(true); return; }
+    if (t.hasAttribute('data-tfilter')) { S.textFilter[t.getAttribute('data-tfilter')] = t.value; rerender(true); return; }
+    var c = t.getAttribute('data-act-change');
+    if (c === 'skill' || c === 'text') { fillAssign(); }
+    if (c === 'rstudent') { S.reportStudent = t.value; rerender(true); }
+    if (t.hasAttribute('data-rub')) { var ed = S.fbEdits[S.selResp] || (S.fbEdits[S.selResp] = {}); ed['r' + t.getAttribute('data-rub')] = t.checked; save(); }
+  });
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.hasAttribute('data-ace')) { S.ace[t.getAttribute('data-ace')] = t.value; save(); }
+    if (t.hasAttribute('data-fb')) { var ed = S.fbEdits[S.selResp] || (S.fbEdits[S.selResp] = {}); ed[t.getAttribute('data-fb')] = t.value; save(); }
+    if (t.getAttribute('data-filter') === 'q') { S.filter.q = t.value; var pos = t.selectionStart; rerender(true); var n = document.getElementById('fq'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
+  });
+  document.addEventListener('submit', function (e) {
+    var f = e.target.getAttribute('data-form');
+    if (!f) { return; }
+    e.preventDefault();
+    if (f === 'join') { location.hash = '#/s/today'; }
+    if (f === 'assign') {
+      var tx = document.getElementById('atext'), sk = document.getElementById('askill'), due = document.getElementById('adue').value;
+      var t = TEXTS.filter(function (x) { return x.id === tx.value; })[0];
+      var d = due ? new Date(due + 'T12:00:00') : null;
+      S.assignments.unshift({ title: t.title, skill: sk.value, due: d ? d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'soon', started: 0, total: 20 });
+      rerender(true); toast('Assigned to 20 students.');
+    }
+  });
+
+  /* home link works on GitHub Pages and in the hosted preview */
+  var home = document.getElementById('homelink');
+  if (!/github\.io$/.test(location.hostname) && location.protocol !== 'file:') { home.href = 'https://claude.ai/artifact/QGMZyGqya9HurMXhoyYaLR'; home.target = '_top'; }
+
+  /* fresh start for the student flow when it begins again */
+  if (!location.hash || location.hash === '#/s/join') { S.rung = 0; S.picked = null; S.checked = false; S.done = false; S.finalRung = null; S.sent = false; S.ace = JSON.parse(JSON.stringify(DEFAULT.ace)); }
+  route();
+})();
+</script>
+</body>
+</html>
